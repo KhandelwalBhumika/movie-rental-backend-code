@@ -1,0 +1,5 @@
+{
+    "indianMobileNumber": "^[6-9][0-9]{9}$",
+    "name": "^[a-zA-z][a-zA-Z ]{2,25}$"
+}
+
