@@ -10,7 +10,9 @@ module.exports.authenticateToken = async (req, res, next) => {
         req.headers["authorization"] ||
         req.headers["x-access-token"];
     if (!token) {
-        return res.status(403).send("Token is required");
+        return res.status(401).json({
+            status: "error",
+            message: "Token is required"});
     }
     try {
         const decoded = jwt.verify(token, process.env.KEY);
@@ -22,6 +24,8 @@ module.exports.authenticateToken = async (req, res, next) => {
     } catch (err) {
         // next();
         console.log(err);
-        return res.status(401).send("Unauthorized token");
+        return res.status(401).json({
+            status: "error",
+            message: "Unauthorized token"});
     }
 }

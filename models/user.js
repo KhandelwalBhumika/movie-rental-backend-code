@@ -39,6 +39,10 @@ const userSchema = new mongoose.Schema({
       enum: ["user", "admin"],//String
       lowercase: true,
       trim: true
+    }, 
+    balance:{
+      type: Number,
+      default: 500
     }
 }, options )
 

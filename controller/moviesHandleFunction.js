@@ -28,7 +28,7 @@ module.exports = {
 
 
     getOneMovie: async (req, res) => {
-        console.log("getOneMovie")
+        //console.log("getOneMovie")
         try {
             const movie = await findByName({
                 name: req.params.name
@@ -36,6 +36,7 @@ module.exports = {
             return res.json(movie)
         } catch (err) {
             res.json({
+                status: "Error",
                 message: err.message
             })
         }
@@ -45,7 +46,6 @@ module.exports = {
     getAllMovies: async (req, res) => {
         console.log('getAllMovies')
         try {
-
             const {
                 genre,
                 limit,
@@ -58,7 +58,6 @@ module.exports = {
             if (genre) {
                 dbQuery.genre = genre
             }
-
             const movie = await findMovie(dbQuery, '', sort, limit, skip)
             return res.json({
                 status: 'Success',
@@ -66,31 +65,34 @@ module.exports = {
             })
         } catch (err) {
             res.json({
+                status: "Error",
                 message: err.message
             })
         }
     },
 
     addMovie: async (req, res) => {
-        console.log('addMovie')
-        console.log(req.body)
+        console.log('addMovie', req.body)
         try {
             const movie = {
                 name: req.body.name,
                 releaseDate: req.body.releaseDate,
-                genre: typeof req.body.genre == 'string' ? JSON.parse(req.body.genre) : req.body.genre,
+                genre: req.body.genre,
                 description: req.body.description,
-                image: req.file.path,
+                // image: req.file.path,
                 price: req.body.price,
                 quantity: req.body.quantity
             }
-
+            console.log('hi', movie)
             const newMovie = await addNewMovie(movie)
-            return res.json(newMovie)
+            return res.json({
+                status: "Success",
+                data: "Movie saved"})
             // return res.send("ok")
         } catch (err) {
             console.log(err.message);
             res.json({
+                status: "Error",
                 message: err.message
             })
         }
@@ -112,15 +114,15 @@ module.exports = {
                 new: true
             })
             console.log(updateMovie)
-            return res.json({
-                message: "movie updated",
+            return res.json(
+                {
+                status: "success",
+                // message: "movie updated",
                 data: updateMovie
-
             })
         } catch (err) {
-            console.log(err)
-
             res.json({
+                status: "Error",
                 message: err.message
             })
         }
@@ -137,30 +139,22 @@ module.exports = {
                 const movie = await deleteOneMovie({
                     _id: id
                 })
-                return res.json(movie)
-            }
-
+                return res.json({
+                    status: "success"
+                    // message: movie 
+                    // message: "Movie successfully deleted!"
+                })
+            };
             return res.status(404).json({
                 message: "movie not found"
             })
         } catch (err) {
             res.json({
+                status: "Error",
                 message: err.message
             })
         }
     },
-
-
-    // const { genre, limit, skip, sort } = req.query
-
-    //         const dbQuery = {}
-
-    //         if (genre) {
-    //             dbQuery.genre = genre
-    //         }
-
-    //         const movies = await Movie.find(dbQuery).sort(sort || 'name').skip(skip || 0).limit(limit || 10)
-    //         return res.json(movies)
 
     // filterByGenre: async (req, res) => {
     //     console.log('filterByGenre')
@@ -219,12 +213,12 @@ module.exports = {
 
             if (!checkMovieObj) return res.send('The movie does not exist in the database.')
 
-            if (checkMovieObj.quantity > req.body.quantity) {
+            if (checkMovieObj.quantity < req.body.quantity) {
                 return res.json({
-                    status: 'failure',
+                    status: 'error',
                     message: 'Insufficient quantity'
                 })
-            }
+            }   
 
             const payload = {
                 userId: req.user._id,
@@ -243,16 +237,27 @@ module.exports = {
             })
 
             const saved = await saveRentedMovie(payload)
-            return res.json(saved)
+            return res.json({
+                status: 'success',
+                message: 'Movie rented successfully!'
+            })
         } catch (err) {
             console.log(err);
             return res.json({
-                message: err.message
+                status: "error",
+                // message: err.message
+                message: 'error'
             })
         }
     },
     userRentedList: async (req, res, next) => {
         try {
+            const {
+                limit,
+                skip,
+                sort
+            } = req.query
+            
             const rentedMovieList = await findRentedMovie()
             return res.json({
                 status: "Success",
@@ -260,6 +265,7 @@ module.exports = {
             })
         } catch (err) {
             return res.json({
+                status: "Error",
                 message: err.message
             })
         }

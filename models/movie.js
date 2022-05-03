@@ -7,10 +7,10 @@ const movieSchema = new mongoose.Schema({
         unique: true
     },
     releaseDate: {
-        type: String
+        type: Date
     },
     genre: {
-        type: Array
+        type: String
     },
     description: {
         type: String

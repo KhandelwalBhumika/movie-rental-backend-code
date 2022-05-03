@@ -3,12 +3,12 @@ const mongoose = require('mongoose');
 const rentSchema = new mongoose.Schema({
     userId: {
         type:  mongoose.Schema.Types.ObjectId,
-        ref: "user",
+        ref: "User",
         required: true
     },
     movieId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "movie",
+        ref: "Movie",
         required: true
     },
     quantity:{
