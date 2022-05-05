@@ -12,7 +12,8 @@ const {
     editingMovie,
     deleteOneMovie,
     findMovieById,
-    findMovie
+    findMovie,
+    updatingBalance
 } = require('../services/movies.service')
 const {
     userFindOne,
@@ -21,7 +22,7 @@ const {
     findRentedMovie
 } = require('../services/rent.service');
 
-
+const {userFindOneById} = require('../services/user.services')
 
 
 module.exports = {
@@ -198,41 +199,57 @@ module.exports = {
     // },
 
 
-
-
-
     rentMovie: async (req, res) => {
         console.log('rentMovie')
         try {
             const movieId = req.body.movieId;
-            // const qty = req.body.quantity;
             req.body.userId = req.user._id;
 
             const checkMovieObj = await movieFindOneById(movieId)
+            const pickUser = await userFindOneById(req.user._id)
 
+            console.log('pickUser', pickUser, 'req.user._id', req.user._id, 'checkMovieObj', checkMovieObj)
 
-            if (!checkMovieObj) return res.send('The movie does not exist in the database.')
+            if (!checkMovieObj) {
+            return res.json({ 
+                status: "error", 
+                message:'The movie does not exist in the database.'
+            })
+            }
 
             if (checkMovieObj.quantity < req.body.quantity) {
                 return res.json({
                     status: 'error',
-                    message: 'Insufficient quantity'
+                    message: 'Insufficient quantity!'
                 })
-            }   
-
+            }  
+            if(pickUser.balance < req.body.quantity * checkMovieObj.price){
+                return res.json({
+                    status: "error",
+                    message: "Insufficient balance!"
+                })
+            }
             const payload = {
                 userId: req.user._id,
+                // userId : user_Id,
                 movieId: checkMovieObj._id,
                 quantity: req.body.quantity,
                 price: checkMovieObj.price || 0
             }
             console.log(payload)
-            // console.log(typeof(payload.quantity))
+            console.log(typeof(payload.quantity))
 
-            const updatedQuantity = checkMovieObj.quantity - req.body.quantity || 0
-            await editingMovie(movieId, {
+            const updatedQuantity = checkMovieObj.quantity - req.body.quantity
+            const updatedBalance = pickUser.balance - (req.body.quantity * checkMovieObj.price) 
+
+            editingMovie(movieId, {
                 $set: {
-                    quantity: (updatedQuantity > 0 ? updatedQuantity : 0)
+                    quantity: updatedQuantity
+                }
+            })
+            updatingBalance(req.user._id, {
+                $set: {
+                    balance: updatedBalance
                 }
             })
 
@@ -245,11 +262,11 @@ module.exports = {
             console.log(err);
             return res.json({
                 status: "error",
-                // message: err.message
-                message: 'error'
+                message: err.message
             })
         }
     },
+
     userRentedList: async (req, res, next) => {
         try {
             const {

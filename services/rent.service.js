@@ -1,5 +1,6 @@
 const Rent = require('../models/rent');
 const Movie = require('../models/movie')
+const User = require('../models/user')
 
 exports.userFindOne = async (condition) => {return await Rent.findOne(condition)}
 
@@ -8,6 +9,10 @@ exports.findUsers = async (query) => {
 
 exports.saveRentedMovie = async (rentData) => {     
     return await Rent.create(rentData)
+}
+
+exports.saveUser = async (rentBalance) => {     
+    return await User.updateOne(rentBalance)
 }
 
 exports.movieFindOneById = async _id => await Movie.findById(_id)

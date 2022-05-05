@@ -18,11 +18,11 @@ const joiValidationSchema = require('../utils/validation');
 router.get('/', authenticateToken, checkIfAdmin, userController.gettingAllUser)
 
 //Getting One --> working
-router.get('/:id', authenticateToken, checkIfAdmin, userController.gettingOneUser)
+router.get('/details', authenticateToken, userController.gettingOneUser)
 
 
 //Getting One --> working
-router.get('/details', authenticateToken, checkIfAdmin, userController.gettingOneUser)
+// router.get('/details', authenticateToken, checkIfAdmin, userController.gettingOneUser)
 
 //Creating User/signUp --> working
 router.post('/signUp', joiValidation.joiValidator(joiValidationSchema.signupValidation), userController.creatingSignUp)
@@ -40,7 +40,8 @@ router.post('/google', userController.googleLogin)
 // router.post('/users-authenticate', userUtils.authenticateToken, userController.authenticateUser)
 
 //Updating One and managing wallet
-router.put('/:id/updateWallet', authenticateToken, joiValidation.joiValidator(joiValidationSchema.editProfile), userController.updatingUser)
+router.put('/manage/updateWallet', authenticateToken, 
+joiValidation.joiValidator(joiValidationSchema.editProfile), userController.updatingUser)
 
 // //Deleting One
 // router.delete('/:id', userUtils.getUser, userController.deletingUser)

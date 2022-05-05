@@ -1,4 +1,5 @@
 const Movie = require('../models/movie');
+const User = require('../models/user');
 
 module.exports.findByName = async (name) => {
     return await Movie.findOne(name)
@@ -18,6 +19,9 @@ module.exports.editingMovie = async (id, body, option) => {
     return await Movie.findByIdAndUpdate(id, body, option)
 }
 
+module.exports.updatingBalance = async (id, body, option) => {
+    return await User.findByIdAndUpdate(id, body, option)
+}
 
 module.exports.findMovieById = async (id) => {
     return await Movie.findById(id)

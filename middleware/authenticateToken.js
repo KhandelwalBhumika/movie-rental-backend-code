@@ -22,7 +22,6 @@ module.exports.authenticateToken = async (req, res, next) => {
         console.log(decoded);
         return next();
     } catch (err) {
-        // next();
         console.log(err);
         return res.status(401).json({
             status: "error",

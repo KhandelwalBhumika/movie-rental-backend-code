@@ -30,7 +30,7 @@ const userSchema = new mongoose.Schema({
         
     },
     contactNumber: {
-        type: Number,
+        type: String,
         // required: true
     },
     role:{
@@ -40,10 +40,11 @@ const userSchema = new mongoose.Schema({
       lowercase: true,
       trim: true
     }, 
-    balance:{
+        balance:{
       type: Number,
       default: 500
-    }
+    },
+    
 }, options )
 
 

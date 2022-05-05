@@ -12,12 +12,12 @@ module.exports.findOneUser = async (email) => {
     return await User.findOne(email)
 }
 
+module.exports.userFindOneById = async (id) => {
+    return await User.findById(id)
+}
+
+
 module.exports.updateUser = async(id,query) => { 
-    // console.log("inside service", query)
-    // console.log("id insid service .......................",id)
-    // User.findByIdandUpdate(id,query)
-    // console.log("this is the one", await User.findById({_id:"624d47731016729b748cb134"}))
-    // console.log("updeted user:",userUpdated )
     userUpdated = await User.findByIdAndUpdate({_id:id}, query,{new:true})
     return userUpdated
 }
@@ -27,4 +27,8 @@ module.exports.removingUser = async (query) => {
 
 module.exports.findOneUserBalance = async (id, query) => {
     return await User.findOne(id, query)
+}
+
+module.exports.updateBalance = async (id, query) => {
+    return await User.findByIdAndUpdate({_id:id}, query, {new:true})
 }

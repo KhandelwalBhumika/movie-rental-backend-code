@@ -7,8 +7,11 @@ const {
     findUser,
     creatingNewUser,
     findOneUser,
-    updateUser
+    updateUser,
+    updateBalance,
 } = require('../services/user.services');
+const { findByIdAndUpdate } = require('../models/user');
+const user = require('../models/user');
 // const {OAuth2Client, GoogleAuth} = require ('google-auth-library');
 // import User from “./user.model”;
 // import HTTPStatus from “http-status”;
@@ -27,10 +30,10 @@ module.exports = {
         }
     },
 
-    gettingOneUser: async (req, res) => {
-        console.log('/get/gettingOneUser')
+        gettingOneUser: async (req, res) => {
+        console.log('gettingOneUser')
         try {
-            const user = await User.findById(req.params.id || req.user._id)
+            const user = await User.findById(req.user._id, "-password -modifiedAt -createdAt -role -finalBalance" )
             return res.json(user)
         } catch (err) {
             return res.json({
@@ -123,7 +126,7 @@ module.exports = {
             })
         } catch (err) {
             return res.json({
-                status: "Error",
+                status: "error",
                 message: err.message
             })
 
@@ -227,9 +230,10 @@ module.exports = {
     //     return res.json(posts.filter(post => post.username === req.user.name))
     // },
 
+
+
     updatingUser: async (req, res) => {
         console.log('updatingUser')
-      console.log("this is req_id //////////////////////////////////////",req.user)
         if (req.body.firstName != null) {
             req.user.firstName = req.body.firstName
         } if (req.body.lastName != null) {
@@ -241,23 +245,25 @@ module.exports = {
         } if (req.body.contactNumber != null) {
             req.user.contactNumber = req.body.contactNumber
         } if (req.body.balance != null) {
-            req.user.balance = req.body.balance
-        } if (req.body.timeStamp != null) {
-            req.user.timeStamp = req.body.timeStamp
-        }
-        console.log(req.body)
+            req.user.balance = req.body.balance 
+        } 
+        
         try {
+            const userData = await findUser({ _id: req.user._id})
+            req.body.balance = Number(userData[0].balance) + Number(req.body.balance)
+            console.log(req.body, userData)
             const updatedUser = await updateUser(req.user._id, req.body)
+            console.log('updatedUser', updatedUser)
+
             return res.send({
                 status: "success",
-                // message: updatedUser
                 message: "succesfully updated"
             })
         } catch (err) {
             console.log(err)
                     return res.json({
                         status: "Error",
-                        message: err.res.message
+                        message: err.message
                     })
                 }
     },
@@ -269,14 +275,5 @@ module.exports = {
     //         res.send({message: err.message})
     //     }
     // }
-
-
-
-
-
-
-    
-
-
 
 }
