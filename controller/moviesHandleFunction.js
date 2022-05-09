@@ -1,6 +1,7 @@
 // const express = require('express');
 const res = require('express/lib/response');
 const Movie = require('../models/movie');
+const transaction = require('../models/transaction');
 const {
     findOne
 } = require('../models/user');
@@ -19,10 +20,12 @@ const {
     userFindOne,
     saveRentedMovie,
     movieFindOneById,
-    findRentedMovie
+    findRentedMovie,
 } = require('../services/rent.service');
+const {newtransaction} = require('../services/transaction.service');
 
-const {userFindOneById} = require('../services/user.services')
+const {userFindOneById, findOneUser} = require('../services/user.services')
+const {walletHistory} = require('../services/transaction.service')
 
 
 module.exports = {
@@ -73,27 +76,26 @@ module.exports = {
     },
 
     addMovie: async (req, res) => {
-        console.log('addMovie', req.body)
+        console.log('addMovie')
         try {
             const movie = {
                 name: req.body.name,
                 releaseDate: req.body.releaseDate,
                 genre: req.body.genre,
                 description: req.body.description,
-                // image: req.file.path,
                 price: req.body.price,
                 quantity: req.body.quantity
             }
-            console.log('hi', movie)
             const newMovie = await addNewMovie(movie)
+            console.log('newMovie', newMovie)
+
             return res.json({
-                status: "Success",
+                status: "success",
                 data: "Movie saved"})
-            // return res.send("ok")
         } catch (err) {
             console.log(err.message);
             res.json({
-                status: "Error",
+                status: "error",
                 message: err.message
             })
         }
@@ -123,7 +125,7 @@ module.exports = {
             })
         } catch (err) {
             res.json({
-                status: "Error",
+                status: "error",
                 message: err.message
             })
         }
@@ -132,18 +134,18 @@ module.exports = {
     deleteMovie: async (req, res) => {
         console.log('deleteMovie')
         try {
-            id = req.params.id
-            console.log(id)
-            movieAvailable = await findMovieById(id)
-
+            const id = req.params.id
+            console.log('id', id)
+            const movieAvailable = await findMovieById(id)
+            console.log('movieAvailable', movieAvailable)
             if (movieAvailable) {
-                const movie = await deleteOneMovie({
+                await deleteOneMovie({
                     _id: id
                 })
                 return res.json({
-                    status: "success"
+                    status: "success",
                     // message: movie 
-                    // message: "Movie successfully deleted!"
+                    message: "Movie successfully deleted!"
                 })
             };
             return res.status(404).json({
@@ -151,53 +153,11 @@ module.exports = {
             })
         } catch (err) {
             res.json({
-                status: "Error",
+                status: "error",
                 message: err.message
             })
         }
     },
-
-    // filterByGenre: async (req, res) => {
-    //     console.log('filterByGenre')
-    //     const match = {}
-
-    //     if (req.query.genre) {
-    //         match.genre = req.query.genre === 'true'
-    //     }
-    //     try {
-    //         console.log('aaaaaaaaaaaaaaa')
-    //         await req.Movie.populate({
-    //             path: 'posts',
-    //             match
-    //         }).execPopulate()
-    //         res.send(req.user.Movie)
-    //     } catch (err) {
-    //         console.log(err.message);
-    //         return res.json({
-    //             message: err.message
-    //         })
-    //     }
-
-    // },
-    // filterByReleaseDate: async (req, res) => {
-    //     const match = {}
-
-    //     if (req.query.releaseDate) {
-    //         match.releaseDate = req.query.releaseDate === 'true'
-    //     }
-    //     try {
-    //         await req.Movie.populate({
-    //             path: 'posts',
-    //             match
-    //         }).execPopulate()
-    //         res.send(req.user.Movie)
-    //     } catch (err) {
-    //         return res.json({
-    //             message: err.message
-    //         })
-    //     }
-    // },
-
 
     rentMovie: async (req, res) => {
         console.log('rentMovie')
@@ -236,7 +196,7 @@ module.exports = {
                 quantity: req.body.quantity,
                 price: checkMovieObj.price || 0
             }
-            console.log(payload)
+            console.log('payload', payload)
             console.log(typeof(payload.quantity))
 
             const updatedQuantity = checkMovieObj.quantity - req.body.quantity
@@ -247,17 +207,29 @@ module.exports = {
                     quantity: updatedQuantity
                 }
             })
-            updatingBalance(req.user._id, {
+            userbalance = updatingBalance(req.user._id, {
                 $set: {
                     balance: updatedBalance
                 }
             })
-
             const saved = await saveRentedMovie(payload)
+
+             // add history
+             if(saved !== null){
+                newtransaction({
+                    userId: req.user._id, 
+                    balance: updatedBalance,
+                    rentId: saved._id,
+                    transactionType: "debit- movie rented"
+                })
+               
+               console.log(saved)
+
             return res.json({
                 status: 'success',
                 message: 'Movie rented successfully!'
             })
+        }
         } catch (err) {
             console.log(err);
             return res.json({
@@ -274,17 +246,43 @@ module.exports = {
                 skip,
                 sort
             } = req.query
-            
             const rentedMovieList = await findRentedMovie()
             return res.json({
-                status: "Success",
+                status: "success",
                 data: rentedMovieList
             })
         } catch (err) {
             return res.json({
-                status: "Error",
+                status: "error",
+                message: err.message
+            })
+        }
+    },
+
+    userWalletHistory: async(req, res, next) => {
+        console.log('userWalletHistory')
+        try{
+            const {
+                limit,
+                skip,
+                sort
+            } = req.query
+            // const userData = await userFindOneById({ _id: req.user._id})
+            // console.log('userData', userData)
+            // console.log('_id', _id)
+            const userWalletHistory = await walletHistory({ userId: req.user._id})
+            console.log('userWalletHistory', userWalletHistory)
+            return res.json({
+                status: "success",
+                data: userWalletHistory
+            })
+        } catch (err) {
+            return res.json({
+                status: "error",
                 message: err.message
             })
         }
     }
 }
+
+walletHistory

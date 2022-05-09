@@ -11,7 +11,7 @@ const {
     updateBalance,
 } = require('../services/user.services');
 const { findByIdAndUpdate } = require('../models/user');
-const user = require('../models/user');
+const {newtransaction} = require('../services/transaction.service');
 // const {OAuth2Client, GoogleAuth} = require ('google-auth-library');
 // import User from “./user.model”;
 // import HTTPStatus from “http-status”;
@@ -59,13 +59,13 @@ module.exports = {
             //store the new user (i.e. hashed password)
             const newUser = await creatingNewUser(user)
             return res.json({
-                status: "Success",
+                status: "success",
                 message: "User registerd successfully"
             })
 
         } catch (err) {
             res.json({
-                status: "Error",
+                status: "error",
                 message: err.message
             })
         }
@@ -198,40 +198,6 @@ module.exports = {
         }
     },
 
-    // addMoney: async(req, res) => {
-    //     console.log('addMoney');
-    //     try{
-    //         const updateBalance = req.body.balance;
-    //         console.log('updateBalance', updateBalance, 'req.user._id', req.user._id)
-    //         if(updateBalance == null){
-    //                 return res.send({
-    //                     status: "error",
-    //                     message: "Please enter a valid amount!"
-    //                 })
-    //         } else {
-    //             const newBalance = await User.updateOne(req.user._id, {$set: {balance: updateBalance}})
-    //             return res.json({
-    //                 status: "Success",
-    //                 message: "YAY, balance updated successfully!"
-    //             })
-    //         }
-    //     } catch (err) {
-    //         return res.json({
-    //             status: "Error",
-    //             message: err.message
-    //         })
-    //     }
-
-    // }
-
-
-//        
-    // authenticateUser : (req, res) => {
-    //     return res.json(posts.filter(post => post.username === req.user.name))
-    // },
-
-
-
     updatingUser: async (req, res) => {
         console.log('updatingUser')
         if (req.body.firstName != null) {
@@ -249,16 +215,24 @@ module.exports = {
         } 
         
         try {
+
             const userData = await findUser({ _id: req.user._id})
             req.body.balance = Number(userData[0].balance) + Number(req.body.balance)
             console.log(req.body, userData)
             const updatedUser = await updateUser(req.user._id, req.body)
             console.log('updatedUser', updatedUser)
 
+            if(updateUser !== null){
+            newtransaction({
+                userId: req.user._id, 
+                balance: req.body.balance,
+                transactionType: "credit- money added"
+            })
             return res.send({
                 status: "success",
                 message: "succesfully updated"
             })
+        }
         } catch (err) {
             console.log(err)
                     return res.json({

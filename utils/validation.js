@@ -31,7 +31,7 @@ module.exports = {
             "string.empty": `email must contain value`,
             "string.base": `email should be a type of string`,
             "string.pattern.base": `Please check the format!`,
-            "any.required": `email is a required field`
+            "any.required": `contactNumber is a required field`
         }),
         password: joi.string().regex(/[a-zA-Z0-9]{3,30}/).required()
     }),

@@ -16,7 +16,6 @@ module.exports.userFindOneById = async (id) => {
     return await User.findById(id)
 }
 
-
 module.exports.updateUser = async(id,query) => { 
     userUpdated = await User.findByIdAndUpdate({_id:id}, query,{new:true})
     return userUpdated

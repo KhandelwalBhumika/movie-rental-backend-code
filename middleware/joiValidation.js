@@ -17,7 +17,7 @@ module.exports.joiValidator = (Schema, property = this.joiValidationProperty.req
         } = Schema.validate(req[property], options)
         if (!error) return next()
         error.message = error.details.map(i => i.message).join(',')
-        error.code = 422
+        error.code = 400
 
         console.log('message', error.message)
         return res.status(error.code).json({

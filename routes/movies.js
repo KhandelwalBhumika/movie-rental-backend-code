@@ -15,17 +15,19 @@ const joiValidation = require('../middleware/joiValidation');
 const joiValidationSchema = require('../utils/validation');
 
 
+//users can see there rented history
+moviesrouter.get('/wallet-history', authenticateToken, moviesController.userWalletHistory)
 
 
 //User can see one movie --->working 
-moviesrouter.get('/:name', moviesController.getOneMovie)
-
+// moviesrouter.get('/:name', moviesController.getOneMovie)
 
 //user can see all movies available --> working
 moviesrouter.get('/', moviesController.getAllMovies)
 
+
 //Add Movies---> working
-moviesrouter.post('/admin/create', multer.single('image'), authenticateToken, checkIfAdmin, joiValidation.joiValidator(joiValidationSchema.addMovieValidation), moviesController.addMovie)
+moviesrouter.post('/admin/create', authenticateToken, checkIfAdmin, joiValidation.joiValidator(joiValidationSchema.addMovieValidation), moviesController.addMovie)
 
 //admin can edit movies ---> working
 moviesrouter.put('/:id', authenticateToken, checkIfAdmin, joiValidation.joiValidator(joiValidationSchema.editMovieValidation), moviesController.editMovie)
@@ -44,5 +46,6 @@ moviesrouter.post('/rent-movie', authenticateToken, joiValidation.joiValidator(j
 
 //admin can see which user rented which movie with movie details
 moviesrouter.get('/rent-movie/list', authenticateToken, checkIfAdmin, moviesController.userRentedList)
+    
 
 module.exports = moviesrouter
