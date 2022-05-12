@@ -1,3 +1,4 @@
+const { boolean } = require('joi');
 const mongoose = require('mongoose');
 
 const movieSchema = new mongoose.Schema({
@@ -23,6 +24,10 @@ const movieSchema = new mongoose.Schema({
     },
     image : {
         type : String
+    },
+    isDeleted: {
+        type: Boolean,
+        default: false
     }
 } )
 

@@ -33,15 +33,13 @@ router.post('/logIn', joiValidation.joiValidator(joiValidationSchema.loginValida
 //Google Login
 router.post('/google', userController.googleLogin)
 
-// //Managing Wallet
-// router.post('/addMoney', userController.addMoney)
-
-//Authenticate User
-// router.post('/users-authenticate', userUtils.authenticateToken, userController.authenticateUser)
-
 //Updating One and managing wallet
 router.put('/manage/updateWallet', authenticateToken, 
 joiValidation.joiValidator(joiValidationSchema.editProfile), userController.updatingUser)
+
+
+//return movie
+// router.get
 
 // //Deleting One
 // router.delete('/:id', userUtils.getUser, userController.deletingUser)

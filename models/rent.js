@@ -18,6 +18,10 @@ const rentSchema = new mongoose.Schema({
     price: {
         type: Number,
         default: 10
+    },
+    returnStatus: {
+        type: Boolean,
+        default: false
     }
 },
 {

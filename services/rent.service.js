@@ -17,5 +17,7 @@ exports.saveUser = async (rentBalance) => {
 
 exports.movieFindOneById = async _id => await Movie.findById(_id)
 
-module.exports.findRentedMovie = async (query={}, projection='', sort='name', limit=1000, skip=0) => await Rent.find(query, projection).sort(sort).skip(skip).limit(limit).populate(['userId','movieId'])
+module.exports.findRentedMovie = async (query={}, projection='', sort='name', limit=1000, skip=0) => await Rent.find(
+    query
+    , projection).sort(sort).skip(skip).limit(limit).populate(['userId','movieId'])
 

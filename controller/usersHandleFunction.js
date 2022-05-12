@@ -18,13 +18,13 @@ const {newtransaction} = require('../services/transaction.service');
 
 module.exports = {
     gettingAllUser: async (req, res) => {
-        console.log('/get/gettingAllUser')
+        console.log('gettingAllUser')
         try {
             const users = await findUser()
             return res.json(users)
         } catch (err) {
             res.json({
-                status: "Error",
+                status: "error",
                 message: err.message
             })
         }
@@ -37,7 +37,7 @@ module.exports = {
             return res.json(user)
         } catch (err) {
             return res.json({
-                status: "Error",
+                status: "error",
                 message: err.message
             })
         }
@@ -53,16 +53,21 @@ module.exports = {
                 email: req.body.email,
                 contactNumber: req.body.contactNumber,
                 //hashed password
-                password: await bcrypt.hash(req.body.password, saltRounds)
-
+                password: await bcrypt.hash(req.body.password, saltRounds),
+                confirmPassword: req.body.confirmPassword
             }
+            if(req.body.confirmPassword !== req.body.password){
+                return res.status(400).json({
+                    status: "error",
+                    message: "password and confirm password do not match!!!"
+                })
             //store the new user (i.e. hashed password)
-            const newUser = await creatingNewUser(user)
+        } 
+        const newUser = await creatingNewUser(user)
             return res.json({
                 status: "success",
                 message: "User registerd successfully"
             })
-
         } catch (err) {
             res.json({
                 status: "error",
@@ -204,18 +209,20 @@ module.exports = {
             req.user.firstName = req.body.firstName
         } if (req.body.lastName != null) {
             req.user.lastName = req.body.lastName
-        } if (req.body.email != null) {
-            req.user.email = req.body.email
-        } if (req.body.password != null) {
-            req.user.password = req.body.password
         } if (req.body.contactNumber != null) {
             req.user.contactNumber = req.body.contactNumber
-        } if (req.body.balance != null) {
-            req.user.balance = req.body.balance 
         } 
+        if(req.body.balance != null){
+            if(req.body.balance < 0){
+                return res.send({
+                    status: "error",
+                    message: "please enter correct amount."
+                })
+            }
+            req.user.balance = req.body.balance
+        }
         
         try {
-
             const userData = await findUser({ _id: req.user._id})
             req.body.balance = Number(userData[0].balance) + Number(req.body.balance)
             console.log(req.body, userData)
@@ -226,7 +233,8 @@ module.exports = {
             newtransaction({
                 userId: req.user._id, 
                 balance: req.body.balance,
-                transactionType: "credit- money added"
+                transactionType: "credit- money added",
+                amountAdded: userData[0].balance
             })
             return res.send({
                 status: "success",
@@ -236,7 +244,7 @@ module.exports = {
         } catch (err) {
             console.log(err)
                     return res.json({
-                        status: "Error",
+                        status: "error",
                         message: err.message
                     })
                 }

@@ -12,19 +12,27 @@ const options = {
   const transactionSchema = new mongoose.Schema({
         rentId:{
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Rent"
+            ref: "Rent",
+            default: null
         },
         userId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
-            require: true
+            require: true,
+            default: null
         },
         balance: {
             type: Number,
+            default: 0
+        },
+        amountAdded: {
+            type: Number,
+            default: 0
         },
         transactionType: {
             type: String,
-            enum: ["debit- movie rented", "credit- money added"]
+            enum: ["debit- movie rented", "credit- money added"],
+            default: "debit- movie rented"
         }
   }, options )
 

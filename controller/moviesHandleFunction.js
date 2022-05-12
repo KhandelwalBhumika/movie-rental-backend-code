@@ -14,7 +14,9 @@ const {
     deleteOneMovie,
     findMovieById,
     findMovie,
-    updatingBalance
+    updatingBalance,
+    softDeleteOneMovie,
+    findOneMovie
 } = require('../services/movies.service')
 const {
     userFindOne,
@@ -32,7 +34,7 @@ module.exports = {
 
 
     getOneMovie: async (req, res) => {
-        //console.log("getOneMovie")
+        console.log("getOneMovie")
         try {
             const movie = await findByName({
                 name: req.params.name
@@ -40,7 +42,7 @@ module.exports = {
             return res.json(movie)
         } catch (err) {
             res.json({
-                status: "Error",
+                status: "error",
                 message: err.message
             })
         }
@@ -64,12 +66,12 @@ module.exports = {
             }
             const movie = await findMovie(dbQuery, '', sort, limit, skip)
             return res.json({
-                status: 'Success',
+                status: 'success',
                 data: movie
             })
         } catch (err) {
             res.json({
-                status: "Error",
+                status: "error",
                 message: err.message
             })
         }
@@ -135,16 +137,22 @@ module.exports = {
         console.log('deleteMovie')
         try {
             const id = req.params.id
-            console.log('id', id)
-            const movieAvailable = await findMovieById(id)
+            const movieAvailable = await 
+            findOneMovie(
+                {id},
+                {isDeleted: false}
+            )
             console.log('movieAvailable', movieAvailable)
             if (movieAvailable) {
-                await deleteOneMovie({
-                    _id: id
-                })
+                    await softDeleteOneMovie(
+                    {_id: id}, 
+                    {
+                            isDeleted: true
+                    }
+                //    {isDeleted: true}
+                )
                 return res.json({
                     status: "success",
-                    // message: movie 
                     message: "Movie successfully deleted!"
                 })
             };
@@ -176,7 +184,6 @@ module.exports = {
                 message:'The movie does not exist in the database.'
             })
             }
-
             if (checkMovieObj.quantity < req.body.quantity) {
                 return res.json({
                     status: 'error',
@@ -240,19 +247,30 @@ module.exports = {
     },
 
     userRentedList: async (req, res, next) => {
+        console.log('userRentedList')
         try {
             const {
                 limit,
                 skip,
                 sort
             } = req.query
-            const rentedMovieList = await findRentedMovie()
+
+
+            console.log('req.user._id', req.user._id, req.user.role)
+            const query = {}
+            if(req.user.role == "user"){
+                query.userId = req.user._id
+                // query.returnStatus = false
+            }
+
+            const rentedMovieList = await findRentedMovie(query)
             return res.json({
                 status: "success",
                 data: rentedMovieList
             })
+        
         } catch (err) {
-            return res.json({
+            return res.status(400).json({
                 status: "error",
                 message: err.message
             })
@@ -267,11 +285,8 @@ module.exports = {
                 skip,
                 sort
             } = req.query
-            // const userData = await userFindOneById({ _id: req.user._id})
-            // console.log('userData', userData)
-            // console.log('_id', _id)
             const userWalletHistory = await walletHistory({ userId: req.user._id})
-            console.log('userWalletHistory', userWalletHistory)
+            // console.log('userWalletHistory', userWalletHistory)
             return res.json({
                 status: "success",
                 data: userWalletHistory
@@ -286,3 +301,7 @@ module.exports = {
 }
 
 walletHistory
+
+
+
+

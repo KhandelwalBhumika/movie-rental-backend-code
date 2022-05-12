@@ -6,17 +6,15 @@ module.exports = {
     //SignUp
 	signupValidation: joi.object({
         firstName: joi.string().trim().pattern(new RegExp(Regexp.name)).required(),
-		lastName: joi.string().trim().pattern(new RegExp(Regexp.name)).required(),
-		email: joi.string().email().required().messages({
+		lastName: joi.string().trim().pattern(new RegExp(Regexp.lastname)).required(),
+		email: joi.string().email({ tlds: { allow: false } }).required().messages({
             "string.empty": `email must contain value`,
             "string.base": `email should be a type of string`,
             "string.pattern.base": `Please check the format!`,
             "any.required": `contactNumber is a required field`
         }),
-		password: joi.string().trim().
-        // regex(/[a-zA-Z0-9]{3,30}/).
-        required(),
-		// contactNumber: joi.string().trim().pattern(new RegExp(Regexp.indianMobileNumber)).required(),
+		password: joi.string().trim().required(),
+        confirmPassword: joi.string().trim().required(),
         contactNumber: joi.string().trim().pattern(new RegExp(Regexp.indianMobileNumber)).required().messages({
             "string.base": `contactNumber should be a type of string`,
             "string.empty": `contactNumber must contain value`,
@@ -27,7 +25,7 @@ module.exports = {
 	}),
     //LogIn
     loginValidation: joi.object({
-        email: joi.string().email().required().messages({
+        email: joi.string().email({ tlds: { allow: false } }).required().messages({
             "string.empty": `email must contain value`,
             "string.base": `email should be a type of string`,
             "string.pattern.base": `Please check the format!`,
@@ -75,12 +73,10 @@ module.exports = {
     editProfile: joi.object({
         firstName: joi.string().trim().pattern(new RegExp(Regexp.name)),
 		lastName: joi.string().trim().pattern(new RegExp(Regexp.name)),
-		email: joi.string().email(),
+		// email: joi.string().email(),
 		password: joi.string().trim(),
-		// contactNumber: joi.string().trim().pattern(new RegExp(Regexp.indianMobileNumber)).required(),
         contactNumber: joi.string().trim().pattern(new RegExp(Regexp.indianMobileNumber)).messages({
             "string.base": `contactNumber should be a type of string`,
-            // "string.empty": `contactNumber must contain value`,
             "string.pattern.base": `contactNumber must be 10 digit number starting from number between 9-6.`,
             }),
 		balance: joi.number(),
