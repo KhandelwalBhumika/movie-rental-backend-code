@@ -6,7 +6,7 @@
   "scripts": {
     "devStart": "nodemon server.js",
     "type": "module",
-    "start": "node server.js"2
+    "start": "node server.js"
   },
   "author": "",
   "license": "ISC",
